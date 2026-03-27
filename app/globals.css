@@ -1,0 +1,107 @@
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap");
+
+/* ── CSS Variables ──────────────────────────────────────── */
+:root {
+  --bg:            #080808;
+  --surface:       #0f0f0f;
+  --surface-2:     #161616;
+  --surface-3:     #1e1e1e;
+  --border:        #252525;
+  --border-bright: #333333;
+
+  --text:          #e8e8e8;
+  --text-muted:    #666666;
+  --text-dim:      #444444;
+
+  /* Status colours */
+  --green:         #00e676;
+  --green-dim:     rgba(0, 230, 118, 0.10);
+  --green-glow:    0 0 12px rgba(0, 230, 118, 0.35);
+
+  --amber:         #ffab40;
+  --amber-dim:     rgba(255, 171, 64, 0.10);
+  --amber-glow:    0 0 12px rgba(255, 171, 64, 0.30);
+
+  --blue:          #448aff;
+  --blue-dim:      rgba(68, 138, 255, 0.10);
+  --blue-glow:     0 0 12px rgba(68, 138, 255, 0.30);
+
+  --red:           #ff5252;
+  --red-dim:       rgba(255, 82, 82, 0.10);
+  --red-glow:      0 0 12px rgba(255, 82, 82, 0.30);
+
+  --purple:        #e040fb;
+  --purple-dim:    rgba(224, 64, 251, 0.10);
+
+  --font-mono: "IBM Plex Mono", "Fira Code", monospace;
+  --font-sans: "IBM Plex Sans", sans-serif;
+}
+
+/* ── Reset ──────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 230, 118, 0.04) 0%, transparent 60%),
+    var(--bg);
+}
+
+/* ── Scrollbar ──────────────────────────────────────────── */
+::-webkit-scrollbar            { width: 6px; }
+::-webkit-scrollbar-track      { background: var(--surface); }
+::-webkit-scrollbar-thumb      { background: var(--border-bright); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover{ background: #555; }
+
+/* ── Keyframes ──────────────────────────────────────────── */
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.7); }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes rowFlash {
+  0%   { background-color: rgba(0, 230, 118, 0.08); }
+  100% { background-color: transparent; }
+}
+
+/* ── Utility ────────────────────────────────────────────── */
+.animate-fade-in {
+  animation: fadeSlideUp 0.35s ease both;
+}
+
+.row-flash {
+  animation: rowFlash 1.2s ease-out forwards;
+}
