@@ -4,67 +4,43 @@ import { useState } from "react";
 import { Trash2, ChevronDown } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { StatusBadge, PriorityBadge } from "./Badges";
+import { ChildrenPanel } from "./ChildrenPanel";
 import type { Todo, TodoStatus, TodoPriority, TodoUpdate } from "@/lib/supabase";
 
 interface Props {
-  todo: Todo;
-  flash: boolean;
+  todo:     Todo;
+  flash:    boolean;
   onUpdate: (id: string, update: TodoUpdate) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
-  index: number;
+  index:    number;
 }
 
-const STATUSES: TodoStatus[] = ["pending", "in_progress", "completed", "blocked"];
-const PRIORITIES: TodoPriority[] = ["low", "medium", "high", "critical"];
-const AGENTS = ["", "Agent Alpha", "Agent Beta", "Agent Gamma", "Agent Delta", "Agent Epsilon"];
+const STATUSES:  TodoStatus[]  = ["pending","in_progress","completed","blocked"];
+const PRIORITIES: TodoPriority[] = ["low","medium","high","critical"];
+const AGENTS = ["","Agent Alpha","Agent Beta","Agent Gamma","Agent Delta","Agent Epsilon"];
 
 export function TodoRow({ todo, flash, onUpdate, onDelete, index }: Props) {
-  const [deleting, setDeleting] = useState(false);
-  const [updating, setUpdating] = useState(false);
+  const [deleting,  setDeleting]  = useState(false);
+  const [updating,  setUpdating]  = useState(false);
 
-  const handleStatusChange = async (status: TodoStatus) => {
+  const update = async (patch: TodoUpdate) => {
     setUpdating(true);
-    try {
-      await onUpdate(todo.id, { status });
-    } finally {
-      setUpdating(false);
-    }
-  };
-
-  const handlePriorityChange = async (priority: TodoPriority) => {
-    setUpdating(true);
-    try {
-      await onUpdate(todo.id, { priority });
-    } finally {
-      setUpdating(false);
-    }
-  };
-
-  const handleAgentChange = async (agent: string) => {
-    setUpdating(true);
-    try {
-      await onUpdate(todo.id, { assigned_agent: agent || null });
-    } finally {
-      setUpdating(false);
-    }
+    try { await onUpdate(todo.id, patch); }
+    finally { setUpdating(false); }
   };
 
   const handleDelete = async () => {
     setDeleting(true);
-    try {
-      await onDelete(todo.id);
-    } catch {
-      setDeleting(false);
-    }
+    try { await onDelete(todo.id); }
+    catch { setDeleting(false); }
   };
 
   const timeAgo = (() => {
-    try {
-      return formatDistanceToNow(new Date(todo.updated_at), { addSuffix: true });
-    } catch {
-      return "—";
-    }
+    try { return formatDistanceToNow(new Date(todo.updated_at), { addSuffix: true }); }
+    catch { return "—"; }
   })();
+
+  const hasChildren = (todo.child_count ?? 0) > 0;
 
   return (
     <tr
@@ -77,12 +53,12 @@ export function TodoRow({ todo, flash, onUpdate, onDelete, index }: Props) {
       }}
     >
       {/* Index */}
-      <td style={{ ...cellStyle, width: "40px", color: "var(--text-dim)", textAlign: "center", fontSize: "11px" }}>
+      <td style={{ ...cell, width: "40px", color: "var(--text-dim)", textAlign: "center", fontSize: "11px" }}>
         {String(index + 1).padStart(2, "0")}
       </td>
 
-      {/* Title */}
-      <td style={{ ...cellStyle, maxWidth: "260px" }}>
+      {/* Title + optional children panel */}
+      <td style={{ ...cell, maxWidth: "280px" }}>
         <span
           style={{
             fontSize: "13px",
@@ -96,110 +72,78 @@ export function TodoRow({ todo, flash, onUpdate, onDelete, index }: Props) {
         >
           {todo.title}
         </span>
+        {hasChildren && (
+          <ChildrenPanel
+            parentId={todo.id}
+            childCount={todo.child_count ?? 0}
+          />
+        )}
       </td>
 
-      {/* Status — inline select */}
-      <td style={{ ...cellStyle, width: "160px" }}>
+      {/* Status */}
+      <td style={{ ...cell, width: "160px" }}>
         <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
           <StatusBadge status={todo.status} />
           <select
             value={todo.status}
-            onChange={(e) => handleStatusChange(e.target.value as TodoStatus)}
+            onChange={(e) => update({ status: e.target.value as TodoStatus })}
             disabled={updating}
-            style={{
-              position: "absolute",
-              inset: 0,
-              opacity: 0,
-              cursor: "pointer",
-              width: "100%",
-            }}
+            style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer", width: "100%" }}
           >
-            {STATUSES.map((s) => (
-              <option key={s} value={s}>{s}</option>
-            ))}
+            {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
       </td>
 
       {/* Priority */}
-      <td style={{ ...cellStyle, width: "80px" }}>
+      <td style={{ ...cell, width: "80px" }}>
         <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
           <PriorityBadge priority={todo.priority} />
           <select
             value={todo.priority}
-            onChange={(e) => handlePriorityChange(e.target.value as TodoPriority)}
+            onChange={(e) => update({ priority: e.target.value as TodoPriority })}
             disabled={updating}
-            style={{
-              position: "absolute",
-              inset: 0,
-              opacity: 0,
-              cursor: "pointer",
-              width: "100%",
-            }}
+            style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer", width: "100%" }}
           >
-            {PRIORITIES.map((p) => (
-              <option key={p} value={p}>{p}</option>
-            ))}
+            {PRIORITIES.map((p) => <option key={p} value={p}>{p}</option>)}
           </select>
         </div>
       </td>
 
       {/* Agent */}
-      <td style={{ ...cellStyle, width: "140px" }}>
+      <td style={{ ...cell, width: "140px" }}>
         <div style={{ position: "relative", display: "inline-flex", alignItems: "center", gap: "4px", maxWidth: "130px" }}>
-          <span
-            style={{
-              fontSize: "11px",
-              color: todo.assigned_agent ? "var(--blue)" : "var(--text-dim)",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            }}
-          >
+          <span style={{ fontSize: "11px", color: todo.assigned_agent ? "var(--blue)" : "var(--text-dim)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {todo.assigned_agent ?? "—"}
           </span>
           <ChevronDown size={10} style={{ color: "var(--text-dim)", flexShrink: 0 }} />
           <select
             value={todo.assigned_agent ?? ""}
-            onChange={(e) => handleAgentChange(e.target.value)}
+            onChange={(e) => update({ assigned_agent: e.target.value || null })}
             disabled={updating}
-            style={{
-              position: "absolute",
-              inset: 0,
-              opacity: 0,
-              cursor: "pointer",
-              width: "100%",
-            }}
+            style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer", width: "100%" }}
           >
-            {AGENTS.map((a) => (
-              <option key={a} value={a}>{a || "Unassigned"}</option>
-            ))}
+            {AGENTS.map((a) => <option key={a} value={a}>{a || "Unassigned"}</option>)}
           </select>
         </div>
       </td>
 
       {/* Updated */}
-      <td style={{ ...cellStyle, width: "130px", color: "var(--text-dim)", fontSize: "11px" }}>
+      <td style={{ ...cell, width: "130px", color: "var(--text-dim)", fontSize: "11px" }}>
         {timeAgo}
       </td>
 
       {/* Delete */}
-      <td style={{ ...cellStyle, width: "40px", textAlign: "center" }}>
+      <td style={{ ...cell, width: "40px", textAlign: "center" }}>
         <button
           onClick={handleDelete}
           disabled={deleting}
           title="Delete task"
           style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            color: "var(--text-dim)",
-            padding: "4px",
-            borderRadius: "3px",
-            display: "inline-flex",
-            alignItems: "center",
-            opacity: deleting ? 0.4 : 1,
-            transition: "color 0.15s",
+            background: "none", border: "none", cursor: "pointer",
+            color: "var(--text-dim)", padding: "4px", borderRadius: "3px",
+            display: "inline-flex", alignItems: "center",
+            opacity: deleting ? 0.4 : 1, transition: "color 0.15s",
           }}
           onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.color = "var(--red)")}
           onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.color = "var(--text-dim)")}
@@ -211,7 +155,7 @@ export function TodoRow({ todo, flash, onUpdate, onDelete, index }: Props) {
   );
 }
 
-const cellStyle: React.CSSProperties = {
+const cell: React.CSSProperties = {
   padding: "12px 14px",
   fontFamily: "var(--font-mono)",
   verticalAlign: "middle",
