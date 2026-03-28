@@ -39,8 +39,8 @@ export function GhostPanel({
     <div
       style={{
         marginTop: "12px",
-        border: "1px solid rgba(255,171,64,0.25)",
-        borderRadius: "6px",
+        border: "1px solid rgba(103,200,255,0.28)",
+        borderRadius: "12px",
         overflow: "hidden",
         animation: "fadeSlideUp 0.2s ease both",
       }}
@@ -52,23 +52,23 @@ export function GhostPanel({
           alignItems: "center",
           justifyContent: "space-between",
           padding: "8px 12px",
-          background: "rgba(255,171,64,0.06)",
-          borderBottom: "1px solid rgba(255,171,64,0.15)",
+          background: "rgba(103,200,255,0.08)",
+          borderBottom: "1px solid rgba(103,200,255,0.16)",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
           {streaming ? (
             <Loader2
               size={12}
-              style={{ color: "var(--amber)", animation: "spin 1s linear infinite" }}
+              style={{ color: "var(--blue)", animation: "spin 1s linear infinite" }}
             />
           ) : (
-            <Sparkles size={12} style={{ color: "var(--amber)" }} />
+            <Sparkles size={12} style={{ color: "var(--blue)" }} />
           )}
           <span
             style={{
               fontSize: "10px",
-              color: "var(--amber)",
+              color: "var(--blue)",
               letterSpacing: "0.08em",
               fontWeight: 600,
             }}
@@ -112,10 +112,10 @@ export function GhostPanel({
             <button
               onClick={onAcceptAll}
               style={{
-                background: "rgba(0,230,118,0.1)",
-                border: "1px solid rgba(0,230,118,0.3)",
+                background: "rgba(103,200,255,0.16)",
+                border: "1px solid rgba(103,200,255,0.35)",
                 borderRadius: "3px",
-                color: "var(--green)",
+                color: "var(--blue)",
                 fontFamily: "var(--font-mono)",
                 fontSize: "9px",
                 fontWeight: 700,
@@ -171,8 +171,8 @@ export function GhostPanel({
             padding: "6px 12px",
             fontSize: "10px",
             color: "var(--text-dim)",
-            background: "rgba(255,171,64,0.03)",
-            borderTop: "1px solid rgba(255,171,64,0.10)",
+            background: "rgba(103,200,255,0.05)",
+            borderTop: "1px solid rgba(103,200,255,0.13)",
           }}
         >
           Accepted subtasks will be created as children of &quot;{parentTitle.slice(0, 40)}{parentTitle.length > 40 ? "…" : ""}&quot;
@@ -198,9 +198,9 @@ function GhostRow({
         alignItems: "center",
         gap: "10px",
         padding: "9px 12px",
-        borderBottom: "1px solid rgba(255,171,64,0.08)",
+        borderBottom: "1px solid rgba(103,200,255,0.12)",
         opacity: ghost.accepted ? 1 : 0.65,
-        background: ghost.accepted ? "rgba(0,230,118,0.04)" : "transparent",
+        background: ghost.accepted ? "rgba(103,200,255,0.08)" : "transparent",
         transition: "all 0.2s ease",
         animation: `fadeSlideUp 0.25s ease both`,
         animationDelay: `${index * 0.06}s`,
@@ -209,7 +209,7 @@ function GhostRow({
       {/* Tree indicator */}
       <ChevronRight
         size={10}
-        style={{ color: "rgba(255,171,64,0.4)", flexShrink: 0 }}
+        style={{ color: "rgba(103,200,255,0.4)", flexShrink: 0 }}
       />
 
       {/* Priority symbol */}

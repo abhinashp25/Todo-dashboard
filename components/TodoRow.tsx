@@ -46,7 +46,7 @@ export function TodoRow({ todo, flash, onUpdate, onDelete, index }: Props) {
     <tr
       className={flash ? "row-flash" : ""}
       style={{
-        borderBottom: "1px solid var(--border)",
+        borderBottom: "1px solid rgba(84,112,161,0.22)",
         opacity: deleting ? 0.4 : 1,
         transition: "opacity 0.3s ease",
         animationDelay: `${index * 0.04}s`,
@@ -129,7 +129,7 @@ export function TodoRow({ todo, flash, onUpdate, onDelete, index }: Props) {
       </td>
 
       {/* Updated */}
-      <td style={{ ...cell, width: "130px", color: "var(--text-dim)", fontSize: "11px" }}>
+      <td style={{ ...cell, width: "130px", color: "var(--text-dim)", fontSize: "10px", letterSpacing: "0.04em" }}>
         {timeAgo}
       </td>
 
@@ -143,8 +143,10 @@ export function TodoRow({ todo, flash, onUpdate, onDelete, index }: Props) {
             background: "none", border: "none", cursor: "pointer",
             color: "var(--text-dim)", padding: "4px", borderRadius: "3px",
             display: "inline-flex", alignItems: "center",
-            opacity: deleting ? 0.4 : 1, transition: "color 0.15s",
+            opacity: deleting ? 0.4 : 1, transition: "color 0.15s, background 0.15s",
           }}
+          onFocus={(e) => ((e.currentTarget as HTMLButtonElement).style.background = "rgba(255,123,143,0.12)")}
+          onBlur={(e) => ((e.currentTarget as HTMLButtonElement).style.background = "transparent")}
           onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.color = "var(--red)")}
           onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.color = "var(--text-dim)")}
         >
@@ -157,6 +159,6 @@ export function TodoRow({ todo, flash, onUpdate, onDelete, index }: Props) {
 
 const cell: React.CSSProperties = {
   padding: "12px 14px",
-  fontFamily: "var(--font-mono)",
+  fontFamily: "var(--font-sans)",
   verticalAlign: "middle",
 };

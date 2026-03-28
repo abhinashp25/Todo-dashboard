@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "TASKOPS — Real-time Dashboard",
-  description: "Live agent task monitoring powered by Supabase Realtime",
+  title: "TASKOPS Command Center",
+  description: "Premium AI-assisted realtime task orchestration dashboard",
 };
 
 export default function RootLayout({

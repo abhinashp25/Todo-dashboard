@@ -32,8 +32,7 @@ const PRIORITY_OPTS: { value: TodoPriority | "all"; label: string }[] = [
 
 export function FilterBar({ filters, onChange }: Props) {
   return (
-    <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
-      {/* Search */}
+    <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap", minWidth: "320px" }}>
       <div style={{ position: "relative", flex: 1, minWidth: "180px" }}>
         <Search
           size={13}
@@ -50,17 +49,8 @@ export function FilterBar({ filters, onChange }: Props) {
           value={filters.search}
           onChange={(e) => onChange({ ...filters, search: e.target.value })}
           placeholder="Search tasks..."
-          style={{
-            background: "var(--surface)",
-            border: "1px solid var(--border)",
-            borderRadius: "3px",
-            color: "var(--text)",
-            fontFamily: "var(--font-mono)",
-            fontSize: "12px",
-            padding: "8px 10px 8px 30px",
-            outline: "none",
-            width: "100%",
-          }}
+          className="app-input"
+          style={{ padding: "9px 10px 9px 30px", fontFamily: "var(--font-mono)" }}
         />
         {filters.search && (
           <button
@@ -83,10 +73,10 @@ export function FilterBar({ filters, onChange }: Props) {
         )}
       </div>
 
-      {/* Status filter */}
       <select
         value={filters.status}
         onChange={(e) => onChange({ ...filters, status: e.target.value as TodoStatus | "all" })}
+        className="app-select"
         style={selectStyle}
       >
         {STATUS_OPTS.map((o) => (
@@ -94,10 +84,10 @@ export function FilterBar({ filters, onChange }: Props) {
         ))}
       </select>
 
-      {/* Priority filter */}
       <select
         value={filters.priority}
         onChange={(e) => onChange({ ...filters, priority: e.target.value as TodoPriority | "all" })}
+        className="app-select"
         style={selectStyle}
       >
         {PRIORITY_OPTS.map((o) => (
@@ -109,14 +99,11 @@ export function FilterBar({ filters, onChange }: Props) {
 }
 
 const selectStyle: React.CSSProperties = {
-  background: "var(--surface)",
-  border: "1px solid var(--border)",
-  borderRadius: "3px",
   color: "var(--text-muted)",
   fontFamily: "var(--font-mono)",
   fontSize: "10px",
-  letterSpacing: "0.06em",
-  padding: "8px 10px",
+  letterSpacing: "0.08em",
+  minWidth: "132px",
+  padding: "9px 10px",
   cursor: "pointer",
-  outline: "none",
 };

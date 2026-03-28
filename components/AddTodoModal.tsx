@@ -106,16 +106,16 @@ export function AddTodoModal({ onAdd, onClose, recentTodos = [] }: Props) {
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          background: "var(--surface)",
-          border: "1px solid var(--border-bright)",
-          borderRadius: "6px",
+          background: "linear-gradient(180deg, rgba(19,29,44,0.98), rgba(14,23,35,0.96))",
+          border: "1px solid rgba(95,132,191,0.35)",
+          borderRadius: "14px",
           width: "520px",
           maxHeight: "90vh",
           overflowY: "auto",
           padding: "28px",
           display: "flex", flexDirection: "column", gap: "20px",
           animation: "fadeSlideUp 0.25s ease both",
-          boxShadow: "0 24px 60px rgba(0,0,0,0.8)",
+          boxShadow: "0 24px 60px rgba(2,8,20,0.75)",
         }}
       >
         {/* Header */}
@@ -137,6 +137,7 @@ export function AddTodoModal({ onAdd, onClose, recentTodos = [] }: Props) {
             onChange={(e) => setTitle(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
             placeholder="Describe the task — AI will suggest subtasks…"
+            className="app-input"
             style={inputStyle}
           />
         </div>
@@ -159,7 +160,7 @@ export function AddTodoModal({ onAdd, onClose, recentTodos = [] }: Props) {
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
             <label style={labelStyle}>STATUS</label>
-            <select value={status} onChange={(e) => setStatus(e.target.value as TodoStatus)} style={selectStyle}>
+            <select value={status} onChange={(e) => setStatus(e.target.value as TodoStatus)} className="app-select" style={selectStyle}>
               <option value="pending">Pending</option>
               <option value="in_progress">In Progress</option>
               <option value="completed">Completed</option>
@@ -168,7 +169,7 @@ export function AddTodoModal({ onAdd, onClose, recentTodos = [] }: Props) {
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
             <label style={labelStyle}>PRIORITY</label>
-            <select value={priority} onChange={(e) => setPriority(e.target.value as TodoPriority)} style={selectStyle}>
+            <select value={priority} onChange={(e) => setPriority(e.target.value as TodoPriority)} className="app-select" style={selectStyle}>
               <option value="low">Low</option>
               <option value="medium">Medium</option>
               <option value="high">High</option>
@@ -180,7 +181,7 @@ export function AddTodoModal({ onAdd, onClose, recentTodos = [] }: Props) {
         {/* Agent */}
         <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
           <label style={labelStyle}>ASSIGNED AGENT</label>
-          <select value={agent} onChange={(e) => setAgent(e.target.value)} style={selectStyle}>
+          <select value={agent} onChange={(e) => setAgent(e.target.value)} className="app-select" style={selectStyle}>
             <option value="">— Unassigned —</option>
             {AGENTS.map((a) => <option key={a} value={a}>{a}</option>)}
           </select>
@@ -226,18 +227,18 @@ const labelStyle: React.CSSProperties = {
   fontSize: "10px", letterSpacing: "0.1em", color: "var(--text-muted)", fontFamily: "var(--font-mono)",
 };
 const inputStyle: React.CSSProperties = {
-  background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: "3px",
-  color: "var(--text)", fontFamily: "var(--font-mono)", fontSize: "13px",
-  padding: "9px 12px", outline: "none", width: "100%",
+  fontFamily: "var(--font-mono)",
+  fontSize: "13px",
+  padding: "10px 12px",
 };
 const selectStyle: React.CSSProperties = { ...inputStyle, cursor: "pointer" };
 const btnSecondaryStyle: React.CSSProperties = {
-  background: "transparent", border: "1px solid var(--border-bright)", borderRadius: "3px",
+  background: "transparent", border: "1px solid var(--border-bright)", borderRadius: "8px",
   color: "var(--text-muted)", fontFamily: "var(--font-mono)", fontSize: "11px",
   letterSpacing: "0.08em", padding: "8px 16px", cursor: "pointer",
 };
 const btnPrimaryStyle: React.CSSProperties = {
-  background: "var(--green)", border: "none", borderRadius: "3px", color: "#000",
+  background: "linear-gradient(125deg, #72cfff, #59ecbb)", border: "none", borderRadius: "8px", color: "#06121e",
   fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700,
   letterSpacing: "0.08em", padding: "8px 18px", cursor: "pointer",
 };

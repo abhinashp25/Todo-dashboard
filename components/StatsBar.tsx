@@ -36,33 +36,32 @@ export function StatsBar({ todos }: Props) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-      {/* Stat cards */}
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(5, 1fr)",
-          gap: "8px",
+          gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))",
+          gap: "10px",
         }}
       >
         {STATS.map((s) => (
           <div
             key={s.status}
             style={{
-              background: "var(--surface)",
+              background: "linear-gradient(180deg, rgba(20,31,46,0.9), rgba(15,24,36,0.8))",
               border: `1px solid ${s.border}`,
-              borderRadius: "4px",
-              padding: "14px 16px",
+              borderRadius: "12px",
+              padding: "14px",
               display: "flex",
               flexDirection: "column",
-              gap: "4px",
+              gap: "5px",
             }}
           >
             <span
               style={{
-                fontSize: "22px",
+                fontSize: "24px",
                 fontWeight: 700,
                 color: s.color,
-                fontFamily: "var(--font-mono)",
+                fontFamily: "var(--font-sans)",
                 letterSpacing: "-0.02em",
                 lineHeight: 1,
               }}
@@ -71,7 +70,7 @@ export function StatsBar({ todos }: Props) {
             </span>
             <span
               style={{
-                fontSize: "10px",
+                fontSize: "9px",
                 color: "var(--text-muted)",
                 fontFamily: "var(--font-mono)",
                 letterSpacing: "0.08em",
@@ -84,14 +83,13 @@ export function StatsBar({ todos }: Props) {
         ))}
       </div>
 
-      {/* Progress bar */}
       <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
         <div
           style={{
             flex: 1,
-            height: "3px",
-            background: "var(--surface-3)",
-            borderRadius: "2px",
+            height: "5px",
+            background: "rgba(113,132,164,0.18)",
+            borderRadius: "999px",
             overflow: "hidden",
           }}
         >
@@ -99,21 +97,22 @@ export function StatsBar({ todos }: Props) {
             style={{
               height: "100%",
               width: `${completionPct}%`,
-              background: "linear-gradient(90deg, var(--green) 0%, rgba(0,230,118,0.6) 100%)",
-              borderRadius: "2px",
-              boxShadow: "0 0 8px rgba(0,230,118,0.5)",
+              background: "linear-gradient(90deg, var(--blue) 0%, var(--green) 100%)",
+              borderRadius: "999px",
+              boxShadow: "0 0 10px rgba(103,200,255,0.55)",
               transition: "width 0.8s cubic-bezier(0.4, 0, 0.2, 1)",
             }}
           />
         </div>
         <span
           style={{
-            fontSize: "11px",
-            color: "var(--green)",
+            fontSize: "10px",
+            color: "var(--blue)",
             fontFamily: "var(--font-mono)",
             fontWeight: 600,
             minWidth: "36px",
             textAlign: "right",
+            letterSpacing: "0.07em",
           }}
         >
           {completionPct}%
