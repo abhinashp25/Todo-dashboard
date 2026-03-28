@@ -57,14 +57,36 @@ export interface GhostSuggestion {
 
 // ── DB helpers ────────────────────────────────────────────────
 export async function fetchTodos(): Promise<Todo[]> {
+  // Step 1: fetch all top-level tasks
   const { data, error } = await supabase
     .from("todos")
     .select("*")
     .eq("is_ghost", false)
+    .is("parent_id", null)
     .order("created_at", { ascending: false })
     .limit(200);
   if (error) throw error;
-  return data as Todo[];
+  const todos = data as Todo[];
+
+  // Step 2: fetch child counts in one query
+  const { data: children } = await supabase
+    .from("todos")
+    .select("parent_id")
+    .eq("is_ghost", false)
+    .not("parent_id", "is", null);
+
+  // Build count map: { parentId -> count }
+  const countMap: Record<string, number> = {};
+  for (const c of (children ?? [])) {
+    const pid = (c as { parent_id: string }).parent_id;
+    countMap[pid] = (countMap[pid] ?? 0) + 1;
+  }
+
+  // Attach child_count to each task
+  return todos.map((t) => ({
+    ...t,
+    child_count: countMap[t.id] ?? 0,
+  }));
 }
 
 export async function insertTodo(todo: TodoInsert): Promise<Todo> {

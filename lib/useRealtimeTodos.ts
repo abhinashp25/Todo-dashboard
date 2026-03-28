@@ -12,13 +12,12 @@ import {
   type TodoUpdate,
 } from "@/lib/supabase";
 
-// ── State shape ──────────────────────────────────────────────
 interface State {
   todos: Todo[];
   loading: boolean;
   error: string | null;
   connected: boolean;
-  recentlyUpdated: Set<string>; // ids that flashed recently
+  recentlyUpdated: Set<string>;
 }
 
 type Action =
@@ -27,6 +26,7 @@ type Action =
   | { type: "CONNECTED"; value: boolean }
   | { type: "UPSERT"; todo: Todo }
   | { type: "REMOVE"; id: string }
+  | { type: "BUMP_CHILD_COUNT"; parentId: string; delta: number }
   | { type: "MARK_RECENT"; id: string }
   | { type: "CLEAR_RECENT"; id: string };
 
@@ -46,9 +46,15 @@ function reducer(state: State, action: Action): State {
       return { ...state, todos };
     }
     case "REMOVE":
+      return { ...state, todos: state.todos.filter((t) => t.id !== action.id) };
+    case "BUMP_CHILD_COUNT":
       return {
         ...state,
-        todos: state.todos.filter((t) => t.id !== action.id),
+        todos: state.todos.map((t) =>
+          t.id === action.parentId
+            ? { ...t, child_count: Math.max(0, (t.child_count ?? 0) + action.delta) }
+            : t
+        ),
       };
     case "MARK_RECENT": {
       const next = new Set(state.recentlyUpdated);
@@ -73,14 +79,12 @@ const initialState: State = {
   recentlyUpdated: new Set(),
 };
 
-// ── Hook ─────────────────────────────────────────────────────
 export function useRealtimeTodos() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const flashTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   const flashRow = useCallback((id: string) => {
     dispatch({ type: "MARK_RECENT", id });
-    // Clear previous timer if exists
     const existing = flashTimers.current.get(id);
     if (existing) clearTimeout(existing);
     const t = setTimeout(() => {
@@ -106,9 +110,29 @@ export function useRealtimeTodos() {
         { event: "*", schema: "public", table: "todos" },
         (payload) => {
           if (payload.eventType === "DELETE") {
-            dispatch({ type: "REMOVE", id: payload.old.id as string });
+            const old = payload.old as Todo;
+            // If deleting a child, decrement parent's count
+            if (old.parent_id) {
+              dispatch({ type: "BUMP_CHILD_COUNT", parentId: old.parent_id, delta: -1 });
+            } else {
+              dispatch({ type: "REMOVE", id: old.id });
+            }
           } else {
             const todo = payload.new as Todo;
+
+            // Child task inserted — just bump the parent's child_count in state
+            if (todo.parent_id) {
+              if (payload.eventType === "INSERT" && !todo.is_ghost) {
+                dispatch({ type: "BUMP_CHILD_COUNT", parentId: todo.parent_id, delta: 1 });
+                flashRow(todo.parent_id);
+              }
+              return; // never add children to the main list
+            }
+
+            // Ghost task — ignore completely
+            if (todo.is_ghost) return;
+
+            // Top-level task — upsert normally
             dispatch({ type: "UPSERT", todo });
             flashRow(todo.id);
           }
@@ -118,31 +142,18 @@ export function useRealtimeTodos() {
         dispatch({ type: "CONNECTED", value: status === "SUBSCRIBED" });
       });
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => { supabase.removeChannel(channel); };
   }, [flashRow]);
 
   // Cleanup timers on unmount
   useEffect(() => {
     const timers = flashTimers.current;
-    return () => {
-      timers.forEach(clearTimeout);
-    };
+    return () => { timers.forEach(clearTimeout); };
   }, []);
 
-  // Mutations exposed to UI
-  const addTodo = useCallback(async (todo: TodoInsert) => {
-    await insertTodo(todo);
-  }, []);
-
-  const patchTodo = useCallback(async (id: string, update: TodoUpdate) => {
-    await updateTodo(id, update);
-  }, []);
-
-  const removeTodo = useCallback(async (id: string) => {
-    await deleteTodo(id);
-  }, []);
+  const addTodo    = useCallback(async (todo: TodoInsert) => { await insertTodo(todo); }, []);
+  const patchTodo  = useCallback(async (id: string, update: TodoUpdate) => { await updateTodo(id, update); }, []);
+  const removeTodo = useCallback(async (id: string) => { await deleteTodo(id); }, []);
 
   return { ...state, addTodo, patchTodo, removeTodo };
 }
