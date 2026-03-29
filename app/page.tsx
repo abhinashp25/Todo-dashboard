@@ -3,6 +3,9 @@
 import { useMemo, useState } from "react";
 import {
   Activity,
+  BarChart3,
+  LayoutGrid,
+  List,
   Bot,
   Gauge,
   Plus,
@@ -15,6 +18,10 @@ import { StatsBar } from "@/components/StatsBar";
 import { TodoRow } from "@/components/TodoRow";
 import { FilterBar, type Filters } from "@/components/FilterBar";
 import { AddTodoModal } from "@/components/AddTodoModal";
+import { BoardView } from "@/components/BoardView";
+import { TaskDetailDrawer } from "@/components/TaskDetailDrawer";
+import { AgentPerformancePanel } from "@/components/AgentPerformancePanel";
+import type { Todo } from "@/lib/supabase";
 
 const PRIORITY_WEIGHT: Record<string, number> = {
   critical: 4,
@@ -28,6 +35,8 @@ export default function DashboardPage() {
     useRealtimeTodos();
 
   const [showModal, setShowModal] = useState(false);
+  const [viewMode, setViewMode] = useState<"table" | "board">("table");
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [filters, setFilters] = useState<Filters>({
     search: "",
     status: "all",
@@ -55,6 +64,7 @@ export default function DashboardPage() {
   const completedCount = todos.filter((t) => t.status === "completed").length;
   const liveAgents = new Set(todos.map((t) => t.assigned_agent).filter(Boolean)).size;
   const completionPct = todos.length > 0 ? Math.round((completedCount / todos.length) * 100) : 0;
+  const selectedTask = todos.find((todo) => todo.id === selectedTaskId) ?? null;
 
   return (
     <div className="dashboard-shell">
@@ -145,59 +155,79 @@ export default function DashboardPage() {
           <StatsBar todos={todos} />
         </section>
 
+        <AgentPerformancePanel todos={filtered} />
+
         <section className="premium-card section-card">
           <div className="filter-shell" style={{ marginBottom: "14px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-              <span className="toolbar-chip">TASK TABLE</span>
+              <span className="toolbar-chip">{viewMode === "table" ? "TASK TABLE" : "KANBAN BOARD"}</span>
               <span className="toolbar-chip">{filtered.length} SHOWN</span>
               <span className="toolbar-chip">{todos.length} TOTAL</span>
             </div>
-            <FilterBar filters={filters} onChange={setFilters} />
-          </div>
-
-          <div className="table-shell">
-            {loading ? (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "10px",
-                  padding: "52px",
-                  color: "var(--text-muted)",
-                  letterSpacing: "0.08em",
-                  fontFamily: "var(--font-mono)",
-                }}
-              >
-                <RefreshCw size={14} style={{ animation: "spin 1s linear infinite" }} />
-                LOADING REALTIME TASKS
-              </div>
-            ) : filtered.length === 0 ? (
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: "10px",
-                  padding: "54px",
-                }}
-              >
-                <span
-                  style={{
-                    color: "var(--text-dim)",
-                    fontFamily: "var(--font-mono)",
-                    letterSpacing: "0.08em",
-                  }}
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+              <FilterBar filters={filters} onChange={setFilters} />
+              <div style={{ display: "inline-flex", gap: "6px" }}>
+                <button
+                  onClick={() => setViewMode("table")}
+                  className={viewMode === "table" ? "btn-primary" : "btn-secondary"}
+                  style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
                 >
-                  {filters.status !== "all" || filters.priority !== "all" || filters.search
-                    ? "No tasks match the current filters"
-                    : "No tasks yet"}
-                </span>
-                <button onClick={() => setShowModal(true)} className="btn-secondary">
-                  Create your first task
+                  <List size={13} /> TABLE
+                </button>
+                <button
+                  onClick={() => setViewMode("board")}
+                  className={viewMode === "board" ? "btn-primary" : "btn-secondary"}
+                  style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
+                >
+                  <LayoutGrid size={13} /> BOARD
                 </button>
               </div>
-            ) : (
+            </div>
+          </div>
+
+          {loading ? (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "10px",
+                padding: "52px",
+                color: "var(--text-muted)",
+                letterSpacing: "0.08em",
+                fontFamily: "var(--font-mono)",
+              }}
+            >
+              <RefreshCw size={14} style={{ animation: "spin 1s linear infinite" }} />
+              LOADING REALTIME TASKS
+            </div>
+          ) : filtered.length === 0 ? (
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "10px",
+                padding: "54px",
+              }}
+            >
+              <span
+                style={{
+                  color: "var(--text-dim)",
+                  fontFamily: "var(--font-mono)",
+                  letterSpacing: "0.08em",
+                }}
+              >
+                {filters.status !== "all" || filters.priority !== "all" || filters.search
+                  ? "No tasks match the current filters"
+                  : "No tasks yet"}
+              </span>
+              <button onClick={() => setShowModal(true)} className="btn-secondary">
+                Create your first task
+              </button>
+            </div>
+          ) : viewMode === "table" ? (
+            <div className="table-shell">
               <table>
                 <thead>
                   <tr>
@@ -215,12 +245,26 @@ export default function DashboardPage() {
                       flash={recentlyUpdated.has(todo.id)}
                       onUpdate={patchTodo}
                       onDelete={removeTodo}
+                      onOpenDetails={(task: Todo) => setSelectedTaskId(task.id)}
                     />
                   ))}
                 </tbody>
               </table>
-            )}
-          </div>
+            </div>
+          ) : (
+            <>
+              <div style={{ marginBottom: "10px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                <span className="toolbar-chip" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                  <BarChart3 size={12} /> DRAG A CARD TO CHANGE STATUS OR PRIORITY
+                </span>
+              </div>
+              <BoardView
+                todos={filtered}
+                onUpdate={patchTodo}
+                onOpenDetails={(task: Todo) => setSelectedTaskId(task.id)}
+              />
+            </>
+          )}
         </section>
       </main>
 
@@ -229,6 +273,14 @@ export default function DashboardPage() {
           onAdd={addTodo}
           onClose={() => setShowModal(false)}
           recentTodos={todos}
+        />
+      )}
+
+      {selectedTask && (
+        <TaskDetailDrawer
+          todo={selectedTask}
+          onClose={() => setSelectedTaskId(null)}
+          onUpdate={patchTodo}
         />
       )}
     </div>

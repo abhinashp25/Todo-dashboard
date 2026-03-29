@@ -13,13 +13,14 @@ interface Props {
   onUpdate: (id: string, update: TodoUpdate) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
   index:    number;
+  onOpenDetails?: (todo: Todo) => void;
 }
 
 const STATUSES:  TodoStatus[]  = ["pending","in_progress","completed","blocked"];
 const PRIORITIES: TodoPriority[] = ["low","medium","high","critical"];
 const AGENTS = ["","Agent Alpha","Agent Beta","Agent Gamma","Agent Delta","Agent Epsilon"];
 
-export function TodoRow({ todo, flash, onUpdate, onDelete, index }: Props) {
+export function TodoRow({ todo, flash, onUpdate, onDelete, index, onOpenDetails }: Props) {
   const [deleting,  setDeleting]  = useState(false);
   const [updating,  setUpdating]  = useState(false);
 
@@ -59,7 +60,8 @@ export function TodoRow({ todo, flash, onUpdate, onDelete, index }: Props) {
 
       {/* Title + optional children panel */}
       <td style={{ ...cell, maxWidth: "280px" }}>
-        <span
+        <button
+          onClick={() => onOpenDetails?.(todo)}
           style={{
             fontSize: "13px",
             color: todo.status === "completed" ? "var(--text-muted)" : "var(--text)",
@@ -68,10 +70,17 @@ export function TodoRow({ todo, flash, onUpdate, onDelete, index }: Props) {
             overflow: "hidden",
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
+            border: "none",
+            background: "transparent",
+            textAlign: "left",
+            width: "100%",
+            cursor: "pointer",
+            padding: 0,
           }}
+          title="Open task details"
         >
           {todo.title}
-        </span>
+        </button>
         {hasChildren && (
           <ChildrenPanel
             parentId={todo.id}
